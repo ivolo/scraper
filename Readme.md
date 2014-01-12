@@ -5,7 +5,7 @@
 
 ## Installation
 
-    $ npm install segmentio/scraper
+    $ npm install ivolo/scraper
 
 ## Example
 
@@ -152,5 +152,3 @@ WWWWWW||WWWWWW
         _||_|| _||_||
        (__|__|(__|__|
 ```
-
-[Copyright (c) 2013](http://animals.ivolo.me) [Segment.io](https://segment.io) &lt;friends@segment.io&gt;
