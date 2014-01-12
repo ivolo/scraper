@@ -4,6 +4,7 @@ var defaults = require('defaults');
 var Emitter = require('events').EventEmitter;
 var inherit = require('util').inherits;
 var phantom = require('phantom');
+var noop = function() {};
 
 /**
  * Expose `create`.
@@ -79,6 +80,7 @@ Scraper.prototype.page = function (options, callback) {
 
   this.phantom.createPage(function (page) {
     disguise(page, options.headers);
+    silence(page);
     debug('created disguised phantom page');
     return callback(null, page);
   });
@@ -166,6 +168,18 @@ function disguise (page, headers) {
   var userAgent = lowercased['user-agent'];
   if (userAgent) page.set('settings.userAgent', userAgent);
   page.set('customHeaders', lowercased);
+}
+
+/**
+ * Silence phantom standard error output.
+ * @param {Page} page
+ */
+
+function silence (page) {
+  page.onConsoleMessage = noop;
+  page.onConfirm = noop;
+  page.onPrompt = noop;
+  page.onError = noop;
 }
 
 /**
