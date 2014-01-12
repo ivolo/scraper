@@ -51,7 +51,7 @@ scraper.html(url, function (err, page, html) {
 ### Command Line
 
 ```
-Usage: scraper url
+Usage: scrape url
 
 Options:
 
@@ -62,20 +62,15 @@ Options:
 Examples:
 
   # print out html
-  $ scraper https://google.com
+  $ scrape https://google.com
 
   # evalute javascript
-  $ scraper https://google.com --eval "document.title"
+  $ scrape https://google.com "document.title"
 
 ```
 
 ```
-$ scraper https://google.com document.title
-
-function anonymous() {
-return document.title;
-}
-
+$ scraper https://google.com "document.title"
 'Google'
 ```
 
@@ -122,12 +117,7 @@ Scraper(function (err, scraper) {
 
 ```js
 {
-  headers: {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'accept-language' :'en-US,en;q=0.8',
-    'cache-control' :'max-age=0'
-  }
+  headers: { .. }
 }
 ```
 
@@ -139,12 +129,7 @@ Scraper(function (err, scraper) {
 {
   checkEvery: 500, // checks document.readyState every so many ms until its ready
   after: 1000, // will wait this many ms after document.readyState to let javascript alter the page
-  headers: {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'accept-language' :'en-US,en;q=0.8',
-    'cache-control' :'max-age=0'
-  }
+  headers: { .. }
 }
 ```
 
@@ -168,4 +153,4 @@ WWWWWW||WWWWWW
        (__|__|(__|__|
 ```
 
-[Copyright (c) 2013](https://animals.ivolo.me) [Segment.io](https://segment.io) &lt;friends@segment.io&gt;
+[Copyright (c) 2013](http://animals.ivolo.me) [Segment.io](https://segment.io) &lt;friends@segment.io&gt;

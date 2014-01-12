@@ -18,10 +18,10 @@ program
     console.log('  Examples:');
     console.log();
     console.log('    # print out html');
-    console.log('    $ scraper -p https://google.com');
+    console.log('    $ scrape https://google.com');
     console.log();
     console.log('    # evalute javascript');
-    console.log('    $ scraper https://google.com "document.title"');
+    console.log('    $ scrape https://google.com "document.title"');
     console.log();
   })
   .parse(process.argv);
@@ -40,7 +40,7 @@ if (program.args.length) {
   js = program.args[1];
 }
 
-if (!url) return process.stdout.write('scraper requires <url>. Run scraper --help\n');
+if (!url) return process.stdout.write('scrape requires <url>. Run scrape --help\n');
 
 /**
  * Logging.
@@ -57,7 +57,7 @@ if (verbose) {
  * Run the scraper.
  */
 
-function run () {
+function scrape () {
   Scraper(function (err, scraper) {
     if (err) return error(err, scraper);
     scraper.html(url, function (err, page, html) {
@@ -66,7 +66,6 @@ function run () {
       if (js) {
         var fn = new Function("", 'return ' + js + ';');
         page.evaluate(fn, function (result) {
-          process.stdout.write(fn.toString() + '\n\n');
           process.stdout.write(util.inspect(result) + '\n');
           page.close();
           done(scraper);
@@ -84,7 +83,7 @@ function run () {
  * Start execution.
  */
 
-run();
+scrape();
 
 
 /**
