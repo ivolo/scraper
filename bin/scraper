@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+
+var colors = require('colors');
+var program = require('commander');
+var Scraper = require('..');
+var util = require('util');
+
+/**
+ * Program.
+ */
+
+program
+  .version(require('../package').version)
+  .usage('[<url>] [<js>]')
+  .option('-v, --verbose', 'write verbose output')
+  .option('-p, --print', 'write html')
+  .on('--help', function () {
+    console.log('  Examples:');
+    console.log();
+    console.log('    # print out html');
+    console.log('    $ scraper -p https://google.com');
+    console.log();
+    console.log('    # evalute javascript');
+    console.log('    $ scraper https://google.com "document.title"');
+    console.log();
+  })
+  .parse(process.argv);
+
+/**
+ * Settings.
+ */
+
+var url;
+var js;
+var print = program.print;
+var verbose = program.verbose;
+
+if (program.args.length) {
+  url = program.args[0];
+  js = program.args[1];
+}
+
+if (!url) return process.stdout.write('scraper requires <url>. Run scraper --help\n');
+
+/**
+ * Logging.
+ */
+
+if (verbose) {
+  process.env['DEBUG'] = '*';
+  console.log();
+  process.on('exit', function () { console.log(); });
+}
+
+
+/**
+ * Run the scraper.
+ */
+
+function run () {
+  Scraper(function (err, scraper) {
+    if (err) return error(err, scraper);
+    scraper.html(url, function (err, page, html) {
+      if (err) return error(err, scraper);
+      if (print || !js) process.stdout.write('\n' + html + '\n');
+      if (js) {
+        var fn = new Function("", 'return ' + js + ';');
+        page.evaluate(fn, function (result) {
+          process.stdout.write(fn.toString() + '\n\n');
+          process.stdout.write(util.inspect(result) + '\n');
+          page.close();
+          done(scraper);
+        });
+      } else {
+        page.close();
+        done(scraper);
+      }
+    });
+  });
+}
+
+
+/**
+ * Start execution.
+ */
+
+run();
+
+
+/**
+ * Log a `string`.
+ *
+ * @param {String} string
+ */
+
+function log (string) {
+  if (!verbose) return;
+  console.log('  Scraper:  '.blue + string);
+}
+
+/**
+ * Log an `err` and exit scraper.
+ *
+ * @param {Error} err
+ * @param {Scraper} scraper
+ */
+
+function error (err, scraper) {
+  log('error: ' + err.toString());
+  done(scraper);
+}
+
+/**
+ * Exit scraper gracefully by exiting phantom.
+ *
+ * @param {Scraper} scraper
+ */
+
+function done (scraper) {
+  if (scraper) scraper.phantom.exit();
+  process.exit();
+}

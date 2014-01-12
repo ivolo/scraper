@@ -1,0 +1,26 @@
+{
+  "name": "scraper",
+  "version": "0.0.1",
+  "repository": "git://github.com/segmentio/scraper.git",
+  "license": "MIT",
+  "description": "Scrape web pages using a nicer phantom API.",
+  "keywords": [
+    "phantom",
+    "API",
+    "scrape",
+    "webpage"
+  ],
+  "bin": {
+    "scraper": "bin/scraper"
+  },
+  "dependencies": {
+    "debug": "~0.7.4",
+    "defaults": "~1.0.0",
+    "phantom": "~0.5.4",
+    "commander": "~2.1.0",
+    "colors": "~0.6.2"
+  },
+  "devDependencies": {
+    "mocha": "~1.15.1"
+  }
+}
