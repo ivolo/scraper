@@ -70,7 +70,7 @@ Examples:
 ```
 
 ```
-$ scraper https://google.com "document.title"
+$ scrape https://google.com "document.title"
 'Google'
 ```
 
