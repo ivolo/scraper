@@ -5,7 +5,7 @@
 
 ## Installation
 
-    $ npm install scraper
+    $ npm install segmentio/scraper
 
 ## Example
 
