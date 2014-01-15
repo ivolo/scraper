@@ -3,6 +3,8 @@ var assert = require('assert');
 var Scraper = require('..');
 
 describe('scraper', function () {
+  this.timeout(5000); // booting up phantom can take a second
+
   it('should be able to create a new phantom instance', function (done) {
     Scraper(function (err, scraper) {
       if (err) return done(err);

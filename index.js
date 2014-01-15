@@ -176,10 +176,10 @@ function disguise (page, headers) {
  */
 
 function silence (page) {
-  page.onConsoleMessage = noop;
-  page.onConfirm = noop;
-  page.onPrompt = noop;
-  page.onError = noop;
+  page.set('onConsoleMessage', noop);
+  page.set('onConfirm', noop);
+  page.set('onPrompt', noop);
+  page.set('onError', noop);
 }
 
 /**
