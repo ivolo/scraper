@@ -4,7 +4,6 @@ var defaults = require('defaults');
 var Emitter = require('events').EventEmitter;
 var inherit = require('util').inherits;
 var phantom = require('phantom');
-var noop = function() {};
 
 /**
  * Expose `create`.
@@ -80,7 +79,6 @@ Scraper.prototype.page = function (options, callback) {
 
   this.phantom.createPage(function (page) {
     disguise(page, options.headers);
-    silence(page);
     debug('created disguised phantom page');
     return callback(null, page);
   });
@@ -171,18 +169,6 @@ function disguise (page, headers) {
 }
 
 /**
- * Silence phantom standard error output.
- * @param {Page} page
- */
-
-function silence (page) {
-  page.set('onConsoleMessage', noop);
-  page.set('onConfirm', noop);
-  page.set('onPrompt', noop);
-  page.set('onError', noop);
-}
-
-/**
  * Waits until page's document.readyState === complete.
  *
  * @param {Page} page
@@ -243,3 +229,15 @@ function getPageHtml (page, callback) {
     }
   );
 }
+
+/**
+ * Add a Phantom standard error handler for silence.
+ * https://github.com/ivolo/scraper/issues/2
+ *
+ * @param {String} message
+ */
+
+phantom.stderrHandler = function (message) {
+ if(message.match(/(No such method.*socketSentData)|(CoreText performance note)|(WARNING: Method userSpaceScaleFactor in class NSView is deprecated on 10.7 and later.)/)) return;
+ console.error(message);
+};
