@@ -35,8 +35,9 @@ function create (options, callback) {
     }
   });
 
-  debug('creating phantom instance at port %d ..', options.port);
+  debug('creating phantom instance at port %d with flags %s ..', options.port, options.flags);
   phantom.create(options.flags, options, function (instance) {
+    console.log('create instance with flags: %s', instance.args);
     debug('created phantom instance at port %d', options.port);
     return callback(null, new Scraper(instance, options));
   });
