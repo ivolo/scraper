@@ -229,6 +229,7 @@ function getPageHtml (page, callback) {
       document.body.outerHTML + '</html>';
     },
     function (html) {
+      html = html || '<html></html>';
       debug('got page html: %d chars', html.length);
       return callback(null, html);
     }
