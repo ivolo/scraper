@@ -50,6 +50,19 @@ describe('scraper', function () {
     });
   });
 
+  it.only('should be able to open a ready page with redirect', function (done) {
+    this.timeout(30000); // need to wait extra for page ready
+    Scraper(function (err, scraper) {
+      if (err) return done(err);
+      scraper.readyPage('http://de.linkedin.com/pub/marlene-dittrich-lux/33/aa4/542', function (err, page) {
+        if (err) return done(err);
+        assert(page);
+        page.close();
+        done();
+      });
+    });
+  });
+
   it('should be able to get a pages html', function (done) {
     this.timeout(30000); // need to wait extra for page ready
     Scraper(function (err, scraper) {

@@ -85,6 +85,7 @@ Scraper.prototype.page = function (options, callback) {
   this.phantom.createPage(function (page) {
     disguise(page, options.headers);
     debug('created disguised phantom page');
+
     return callback(null, page);
   });
 };
@@ -106,13 +107,21 @@ Scraper.prototype.readyPage = function (url, options, callback) {
     options = {};
   }
 
+  var self = this;
   this.page(options, function (err, page) {
     if (err) return callback(err);
+    page.onNavigationRequested = function(newUrl, type, willNavigate, main) {
+      if (main && newUrl!==url) {
+        debug("redirect caught from %s to %s", url, newUrl);
+        page.close();
+        self.readyPage(newUrl, options, callback);
+      }
+    };
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
       if (status !== 'success') {
-        return callback(new Error('Opening page' + url +
-          'resulted in status ' + status));
+        return callback(new Error('Opening page ' + url +
+          ' resulted in status ' + status));
       }
 
       waitForReady(page, function (err) {
