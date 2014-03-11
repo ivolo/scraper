@@ -117,11 +117,17 @@ Scraper.prototype.readyPage = function (url, options, callback) {
         self.readyPage(newUrl, options, callback);
       }
     };
+    page.onResourceError = function(resourceError) {
+      page.reason = resourceError.errorString;
+      page.reason_url = resourceError.url;
+    };
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
       if (status !== 'success') {
         return callback(new Error('Opening page ' + url +
-          ' resulted in status ' + status));
+          ' resulted in status ' + status +
+          ' reason: ' + page.reason + 
+          ' reason_url: ' + page.reason_url));
       }
 
       waitForReady(page, function (err) {
