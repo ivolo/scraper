@@ -3,6 +3,8 @@ var debug = require('debug')('scraper');
 var defaults = require('defaults');
 var Emitter = require('events').EventEmitter;
 var inherit = require('util').inherits;
+var mkdirp = require('mkdirp');
+var path = require('path');
 var phantom = require('phantom');
 
 /**
@@ -27,6 +29,7 @@ function create (options, callback) {
   options = defaults(options, {
     port: 12300 + Math.floor(Math.random() * 10000), // defaults to a random port
     flags: ['--load-images=no'],
+    imagedir: 'scraper/',
     headers: { // disguise headers
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36',
       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -110,24 +113,18 @@ Scraper.prototype.readyPage = function (url, options, callback) {
   var self = this;
   this.page(options, function (err, page) {
     if (err) return callback(err);
-    page.onNavigationRequested = function(newUrl, type, willNavigate, main) {
-      if (main && newUrl!==url) {
-        debug("redirect caught from %s to %s", url, newUrl);
-        page.close();
-        self.readyPage(newUrl, options, callback);
-      }
-    };
-    page.onResourceError = function(resourceError) {
-      page.reason = resourceError.errorString;
-      page.reason_url = resourceError.url;
-    };
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
       if (status !== 'success') {
-        return callback(new Error('Opening page ' + url +
-          ' resulted in status ' + status +
-          ' reason: ' + page.reason + 
-          ' reason_url: ' + page.reason_url));
+        var filename = url.replace(/\//g, '_');
+        filename = filename + '_' + Date.now() + '.jpg';
+        filename = path.join(self.options.imagedir, filename);
+        return page.render(filename, function(renderErr, savedFileName) {
+          callback(new Error('Opening page ' + url +
+            ' resulted in status ' + status +
+            ' reason: ' + page.reason + 
+            ' reason_url: ' + page.reason_url));
+        });
       }
 
       waitForReady(page, function (err) {
