@@ -29,7 +29,7 @@ function create (options, callback) {
   options = defaults(options, {
     port: 12300 + Math.floor(Math.random() * 10000), // defaults to a random port
     flags: ['--load-images=no'],
-    imagedir: 'scraper_err_images/',
+    imagedir: null,
     headers: { // disguise headers
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36',
       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
