@@ -115,16 +115,19 @@ Scraper.prototype.readyPage = function (url, options, callback) {
     if (err) return callback(err);
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
+
       if (status !== 'success') {
+        var done = function() {
+          callback(new Error('Opening page ' + url +
+            ' resulted in status ' + status));
+        };
+        if (!self.options.imagedir) return done();
+
+        // render a snapshot before throwing error.
         var filename = url.replace(/\//g, '_');
         filename = filename + '_' + Date.now() + '.jpg';
         filename = path.join(self.options.imagedir, filename);
-        return page.render(filename, function(renderErr, savedFileName) {
-          callback(new Error('Opening page ' + url +
-            ' resulted in status ' + status +
-            ' reason: ' + page.reason + 
-            ' reason_url: ' + page.reason_url));
-        });
+        return page.render(filename, done);
       }
 
       waitForReady(page, function (err) {
