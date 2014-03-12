@@ -38,6 +38,10 @@ function create (options, callback) {
     }
   });
 
+  if (options.imagedir) {
+    debug('creating image directory for errors: %s', options.imagedir);
+    mkdirp.sync(options.imagedir);
+  }
 
   debug('creating phantom instance at port %d and flags %s ..', options.port, options.flags);
   // use fn.apply to pull flags out into args.
@@ -115,19 +119,23 @@ Scraper.prototype.readyPage = function (url, options, callback) {
     if (err) return callback(err);
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
-
       if (status !== 'success') {
-        var done = function() {
-          callback(new Error('Opening page ' + url +
-            ' resulted in status ' + status));
-        };
-        if (!self.options.imagedir) return done();
+        var statusError = new Error('Opening page ' + url +
+          ' resulted in status ' + status);
+        if (!self.options.imagedir) {
+          debug('not saving error image since no imagedir');
+          return callback(statusError);
+        }
 
         // render a snapshot before throwing error.
         var filename = url.replace(/\//g, '_');
         filename = filename + '_' + Date.now() + '.jpg';
         filename = path.join(self.options.imagedir, filename);
-        return page.render(filename, done);
+        debug('saving error image from phantom to %s', filename);
+        return page.render(filename, function() {
+          debug('saved error image from phantom to %s', filename);
+          callback(statusError);
+        });
       }
 
       waitForReady(page, function (err) {
