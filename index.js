@@ -138,7 +138,10 @@ Scraper.prototype.readyPage = function (url, options, callback) {
         });
       }
 
-      waitForReady(page, function (err) {
+      // wait at most 30 seconds
+      var maxTime = Date.now() + (1000 * 30);
+
+      waitForReady(page, {maxTime: maxTime}, function (err) {
         return callback(err, page);
       });
     });
@@ -222,9 +225,13 @@ function waitForReady (page, options, callback) {
     function () { return document.readyState; },
     function (result) {
       debug('page is document ready, waiting for javascript/ajax timeout ..');
-      if (result === 'complete') {
+      var pastMaxTime = false;
+      if (options.maxTime && options.maxTime < Date.now()) {
+        pastMaxTime = true;
+      }
+      if (result === 'complete' || pastMaxTime) {
         return setTimeout(function () {
-          debug('page is "ready"');
+          debug('page is "ready", pastMaxTime: %s', pastMaxTime);
           return callback();
         }, options.after);
       }
