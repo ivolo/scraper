@@ -115,7 +115,18 @@ Scraper.prototype.readyPage = function (url, options, callback) {
   }
 
   var self = this;
+  var maxWait = (1000 * 30);
+  var maxTime = Date.now() + maxWait;
+  var callbackExecuted = false;
+  setTimeout(function() {
+    if (callbackExecuted) return;
+    callbackExecuted = true;
+    return callback(new Error('page %s timed out waiting to open', url));
+  }, maxWait);
+
   this.page(options, function (err, page) {
+    if(callbackExecuted) return;
+    callbackExecuted = true;
     if (err) return callback(err);
     page.open(url, function (status) {
       debug('page %s opened with status %s', url, status);
@@ -139,7 +150,6 @@ Scraper.prototype.readyPage = function (url, options, callback) {
       }
 
       // wait at most 30 seconds
-      var maxTime = Date.now() + (1000 * 30);
 
       waitForReady(page, {maxTime: maxTime}, function (err) {
         return callback(err, page);
