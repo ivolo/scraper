@@ -6,6 +6,7 @@ var inherit = require('util').inherits;
 var mkdirp = require('mkdirp');
 var path = require('path');
 var phantom = require('phantom');
+var cbutils = require('cb');
 
 /**
  * Expose `create`.
@@ -138,9 +139,9 @@ Scraper.prototype.readyPage = function (url, options, callback) {
         });
       }
 
-      waitForReady(page, function (err) {
+      waitForReady(page, cbutils(function (err) {
         return callback(err, page);
-      });
+      }).timeout(1000 * 60).once()); // always call the callback within a minute and only call once
     });
   });
 };

@@ -19,7 +19,8 @@
     "commander": "~2.1.0",
     "colors": "~0.6.2",
     "phantom": "git://github.com/sgentle/phantomjs-node",
-    "mkdirp": "~0.3.5"
+    "mkdirp": "~0.3.5",
+    "cb": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "~1.15.1"
