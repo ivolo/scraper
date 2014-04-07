@@ -50,7 +50,7 @@ describe('scraper', function () {
     });
   });
 
-  it.only('should be able to open a ready page with redirect', function (done) {
+  it('should be able to open a ready page with redirect', function (done) {
     this.timeout(30000); // need to wait extra for page ready
     Scraper(function (err, scraper) {
       if (err) return done(err);
@@ -68,6 +68,22 @@ describe('scraper', function () {
     Scraper(function (err, scraper) {
       if (err) return done(err);
       scraper.html('https://bing.com', function (err, page, html) {
+        if (err) return done(err);
+        assert(page);
+        page.close();
+        assert(html);
+        assert(html.length > 0);
+        done();
+      });
+    });
+  });
+
+  // useful for testing against local server to verify headers, etc.
+  it.skip('Test headers', function (done) {
+    this.timeout(30000); // need to wait extra for page ready
+    Scraper(function (err, scraper) {
+      if (err) return done(err);
+      scraper.html('http://localhost:3000', function (err, page, html) {
         if (err) return done(err);
         assert(page);
         page.close();
