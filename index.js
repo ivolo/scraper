@@ -99,6 +99,10 @@ Scraper.prototype.page = function (options, callback) {
   this.phantom.createPage(function (err, page) {
     disguise(page, options.headers);
     debug('created disguised phantom page');
+    // add a basic error handler
+    page.onError = function(msg, trace) {
+      debug('ERORR RECIEVED: %s', msg);
+    };
 
     return callback(err, page);
   });
