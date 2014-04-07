@@ -5,7 +5,7 @@ var Emitter = require('events').EventEmitter;
 var inherit = require('util').inherits;
 var mkdirp = require('mkdirp');
 var path = require('path');
-var phantom = require('phantom');
+var phantom = require('node-phantom-simple');
 var cbutils = require('cb');
 
 /**
@@ -46,13 +46,19 @@ function create (options, callback) {
 
   debug('creating phantom instance at port %d and flags %s ..', options.port, options.flags);
   // use fn.apply to pull flags out into args.
-  var args = [].slice.call(options.flags);
-  args.push(options);
-  args.push(function (instance) {
-    debug('created phantom instance at port %d', options.port);
+  var phantomArgs = {};
+  if (options.flags) {
+    options.flags.forEach(function(f) {
+      var match = f.match(/--(.*)=(.*)/);
+      if (match[1] && match[2]) {
+        phantomArgs[match[1]] = match[2];
+      }
+    });
+  }
+  phantom.create(function (err, instance) {
+    debug('created phantom instance', options.port);
     return callback(null, new Scraper(instance, options));
-  });
-  phantom.create.apply(null, args);
+  }, phantomArgs);
 }
 
 /**
@@ -90,11 +96,11 @@ Scraper.prototype.page = function (options, callback) {
 
   debug('creating disguised phantom page ..');
 
-  this.phantom.createPage(function (page) {
+  this.phantom.createPage(function (err, page) {
     disguise(page, options.headers);
     debug('created disguised phantom page');
 
-    return callback(null, page);
+    return callback(err, page);
   });
 };
 
@@ -118,8 +124,9 @@ Scraper.prototype.readyPage = function (url, options, callback) {
   var self = this;
   this.page(options, function (err, page) {
     if (err) return callback(err);
-    page.open(url, function (status) {
+    page.open(url, function (err, status) {
       debug('page %s opened with status %s', url, status);
+      if (err) return callback(err);
       if (status !== 'success') {
         var statusError = new Error('Opening page ' + url +
           ' resulted in status ' + status);
@@ -221,7 +228,8 @@ function waitForReady (page, options, callback) {
   debug('waiting for page document.readyState === complete ..');
   page.evaluate(
     function () { return document.readyState; },
-    function (result) {
+    function (err, result) {
+      if (err) return callback(err);
       debug('page is document ready, waiting for javascript/ajax timeout ..');
       if (result === 'complete') {
         return setTimeout(function () {
@@ -252,10 +260,10 @@ function getPageHtml (page, callback) {
       return '<html>' + document.head.outerHTML +
       document.body.outerHTML + '</html>';
     },
-    function (html) {
+    function (err, html) {
       html = html || '<html></html>';
       debug('got page html: %d chars', html.length);
-      return callback(null, html);
+      return callback(err, html);
     }
   );
 }
@@ -267,7 +275,9 @@ function getPageHtml (page, callback) {
  * @param {String} message
  */
 
+/*
 phantom.stderrHandler = function (message) {
  if(message.match(/(No such method.*socketSentData)|(CoreText performance note)|(WARNING: Method userSpaceScaleFactor in class NSView is deprecated on 10.7 and later.)/)) return;
  console.error(message);
 };
+*/

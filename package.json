@@ -18,7 +18,7 @@
     "defaults": "~1.0.0",
     "commander": "~2.1.0",
     "colors": "~0.6.2",
-    "phantom": "git://github.com/sgentle/phantomjs-node",
+    "node-phantom-simple": "git://github.com/tedjt/node-phantom-simple",
     "mkdirp": "~0.3.5",
     "cb": "~0.1.0"
   },
