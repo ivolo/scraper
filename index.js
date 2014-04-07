@@ -147,7 +147,13 @@ Scraper.prototype.readyPage = function (url, options, callback) {
       }
 
       waitForReady(page, cbutils(function (err) {
-        return callback(err, page);
+        if (options.includeJquery) {
+          return page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js', function() {
+            callback(err, page);
+          });
+        } else {
+          return callback(err, page);
+        }
       }).timeout(1000 * 60).once()); // always call the callback within a minute and only call once
     });
   });
