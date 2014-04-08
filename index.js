@@ -48,12 +48,14 @@ function create (options, callback) {
   // use fn.apply to pull flags out into args.
   var phantomArgs = {};
   if (options.flags) {
+    var phantomParameters = {};
     options.flags.forEach(function(f) {
       var match = f.match(/--(.*)=(.*)/);
       if (match[1] && match[2]) {
-        phantomArgs[match[1]] = match[2];
+        phantomParameters[match[1]] = match[2];
       }
     });
+    phantomArgs.parameters = phantomParameters;
   }
   phantom.create(function (err, instance) {
     debug('created phantom instance', options.port);
