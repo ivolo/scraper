@@ -57,10 +57,41 @@ function create (options, callback) {
     });
     phantomArgs.parameters = phantomParameters;
   }
+  createPhantom(phantomArgs, null, function(err, instance) {
+    var scraper = new Scraper(instance, options);
+    // add an error hander
+    scraper.phantom.process.stderr.on('data', function(data) {
+      if (data.indexOf('PhantomJS has crashed') !== -1) {
+        // on crash create a new instance and associate it with scraper
+        // callback is a noop
+        createPhantom(phantomOptions, scraper, function(err, instance) {});
+      }
+    });
+    return callback(null, scraper);
+  });
+}
+
+function createPhantom(phantomOptions, scraper, callback) {
   phantom.create(function (err, instance) {
-    debug('created phantom instance', options.port);
-    return callback(null, new Scraper(instance, options));
-  }, phantomArgs);
+    debug('created phantom instance');
+    if (!scraper) return callback(null, instance);
+    // otherwise set up bindings
+    instance.process.stderr.on('data', function(data) {
+      if (data.indexOf('PhantomJS has crashed') !== -1) {
+        /// on crash create a new instance and associate it with scraper
+        createPhantom(phantomOptions, scraper, function(err, instance) {
+          // update the instance
+          if (err) {
+            console.log('UNABLE to CREATE new phantom instance');
+            // todo probably crash processs.
+          } else if (scraper) {
+            scraper.phantom = instance;
+          }
+        });
+      }
+    });
+    return callback(null, instance);
+  }, phantomOptions);
 }
 
 /**
@@ -69,10 +100,24 @@ function create (options, callback) {
  * @param {Phantom} phantom
  */
 
-function Scraper (phantom, options) {
+function Scraper (phantom, options, callback) {
   if (!(this instanceof Scraper)) return new Scraper(phantom, options);
-  this.phantom = phantom;
   this.options = options;
+  this.phantom = phantom;
+  var self = this
+  phantom.process.stderr.on('data', function(data) {
+    if (data.indexOf('PhantomJS has crashed') !== -1) {
+      createPhantom(phantomOptions, function(err, instance) {
+        // update the instance
+        if (err) {
+          console.log('UNABLE to CREATE new phantom instance');
+          // todo probably crash processs.
+        } else {
+          self.phantom = instance;
+        }
+      });
+    }
+  });
 }
 
 /**
