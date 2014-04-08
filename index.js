@@ -106,7 +106,7 @@ function Scraper (phantom, options, callback) {
   this.phantom = phantom;
   var self = this
   phantom.process.stderr.on('data', function(data) {
-    if (data.indexOf('PhantomJS has crashed') !== -1) {
+    if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
       createPhantom(phantomOptions, function(err, instance) {
         // update the instance
         if (err) {
