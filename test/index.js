@@ -9,7 +9,7 @@ describe('scraper', function () {
     Scraper(function (err, scraper) {
       if (err) return done(err);
       assert(scraper);
-      assert(scraper.phantom);
+      assert(scraper.phantomArgs);
       done();
     });
   });
@@ -37,7 +37,7 @@ describe('scraper', function () {
     });
   });
 
-  it('should be able to open a ready page', function (done) {
+  it('should be able to open a ready page for google', function (done) {
     this.timeout(30000); // need to wait extra for page ready
     Scraper(function (err, scraper) {
       if (err) return done(err);

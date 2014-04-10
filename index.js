@@ -44,6 +44,7 @@ function create (options, callback) {
     mkdirp.sync(options.imagedir);
   }
 
+  /*
   debug('creating phantom instance at port %d and flags %s ..', options.port, options.flags);
   // use fn.apply to pull flags out into args.
   var phantomArgs = {};
@@ -57,10 +58,14 @@ function create (options, callback) {
     });
     phantomArgs.parameters = phantomParameters;
   }
+  */
   var scraper = new Scraper(options);
+  return callback(null, scraper);
+  /*
   scraper.bindPhantom(phantomArgs, function() {
     return callback(null, scraper);
   });
+  */
 }
 
 /**
@@ -72,6 +77,18 @@ function create (options, callback) {
 function Scraper (options) {
   if (!(this instanceof Scraper)) return new Scraper(options);
   this.options = options;
+  var phantomArgs = {};
+  if (options.flags) {
+    var phantomParameters = {};
+    options.flags.forEach(function(f) {
+      var match = f.match(/--(.*)=(.*)/);
+      if (match[1] && match[2]) {
+        phantomParameters[match[1]] = match[2];
+      }
+    });
+    phantomArgs.parameters = phantomParameters;
+  }
+  this.phantomArgs = phantomArgs;
 }
 
 /**
@@ -113,19 +130,39 @@ Scraper.prototype.page = function (options, callback) {
   }
 
   options = defaults(options, this.options);
+  debug('creating new phantom instance');
+  var self = this;
+  phantom.create(function (err, instance) {
+    debug('created phantom instance');
 
-  debug('creating disguised phantom page ..');
+    debug('creating disguised phantom page ..');
+    instance.createPage(function (err, page) {
+      if (err) return callback(err);
+      disguise(page, options.headers);
+      debug('created disguised phantom page');
+      // add a basic error handler
+      page.onError = function(msg, trace) {
+        debug('ERORR RECIEVED: %s', msg);
+      };
 
-  this.phantom.createPage(function (err, page) {
-    disguise(page, options.headers);
-    debug('created disguised phantom page');
-    // add a basic error handler
-    page.onError = function(msg, trace) {
-      debug('ERORR RECIEVED: %s', msg);
-    };
+      var pageClose = page.close;
+      var isClosed = false;
+      page.close = function() {
+        pageClose(function(err) {
+          instance.exit();
+          isClosed = true;
+        });
+      };
+      // make sure we close this up within about 5 minutes;
+      setTimeout(function() {
+        if (!isClosed) {
+          page.close();
+        }
+      }, 1000 * 60 * 5);
 
-    return callback(err, page);
-  });
+      return callback(err, page);
+    });
+  }, self.phantomArgs);
 };
 
 /**
