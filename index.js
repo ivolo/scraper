@@ -90,7 +90,9 @@ function createPhantom(phantomOptions, scraper, callback) {
         });
       }
     });
-    return callback(null, instance);
+    if (callback) {
+      return callback(null, instance);
+    }
   }, phantomOptions);
 }
 
