@@ -57,43 +57,10 @@ function create (options, callback) {
     });
     phantomArgs.parameters = phantomParameters;
   }
-  createPhantom(phantomArgs, null, function(err, instance) {
-    var scraper = new Scraper(instance, options);
-    // add an error hander
-    scraper.phantom.process.stderr.on('data', function(data) {
-      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
-        // on crash create a new instance and associate it with scraper
-        // callback is a noop
-        createPhantom(phantomOptions, scraper, function(err, instance) {});
-      }
-    });
+  var scraper = new Scraper(options);
+  scraper.bindPhantom(phantomArgs, function() {
     return callback(null, scraper);
   });
-}
-
-function createPhantom(phantomOptions, scraper, callback) {
-  phantom.create(function (err, instance) {
-    debug('created phantom instance');
-    if (!scraper) return callback(null, instance);
-    // otherwise set up bindings
-    instance.process.stderr.on('data', function(data) {
-      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
-        /// on crash create a new instance and associate it with scraper
-        createPhantom(phantomOptions, scraper, function(err, instance) {
-          // update the instance
-          if (err) {
-            console.log('UNABLE to CREATE new phantom instance');
-            // todo probably crash processs.
-          } else if (scraper) {
-            scraper.phantom = instance;
-          }
-        });
-      }
-    });
-    if (callback) {
-      return callback(null, instance);
-    }
-  }, phantomOptions);
 }
 
 /**
@@ -102,24 +69,9 @@ function createPhantom(phantomOptions, scraper, callback) {
  * @param {Phantom} phantom
  */
 
-function Scraper (phantom, options, callback) {
-  if (!(this instanceof Scraper)) return new Scraper(phantom, options);
+function Scraper (options) {
+  if (!(this instanceof Scraper)) return new Scraper(options);
   this.options = options;
-  this.phantom = phantom;
-  var self = this;
-  phantom.process.stderr.on('data', function(data) {
-    if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
-      createPhantom(options, function(err, instance) {
-        // update the instance
-        if (err) {
-          console.log('UNABLE to CREATE new phantom instance');
-          // todo probably crash processs.
-        } else {
-          self.phantom = instance;
-        }
-      });
-    }
-  });
 }
 
 /**
@@ -127,6 +79,25 @@ function Scraper (phantom, options, callback) {
  */
 
 inherit(Scraper, Emitter);
+
+Scraper.prototype.bindPhantom = function(options, callback) {
+  var self = this;
+  debug('binding new phantom to scraper');
+  phantom.create(function (err, instance) {
+    debug('created phantom instance');
+    instance.process.stderr.on('data', function(data) {
+      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
+        /// on crash create a new instance and associate it with scraper
+        debug('Phantom crashed - creating new instance');
+        self.bindPhantom(options);
+      }
+    });
+    self.phantom = instance;
+    if (callback) {
+      callback();
+    }
+  });
+};
 
 /**
  * Open a page using the disguised headers.
