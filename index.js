@@ -133,6 +133,7 @@ Scraper.prototype.page = function (options, callback) {
   debug('creating new phantom instance');
   var self = this;
   phantom.create(function (err, instance) {
+    self.phantom = instance;
     debug('created phantom instance');
 
     debug('creating disguised phantom page ..');
