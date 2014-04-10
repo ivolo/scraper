@@ -61,7 +61,7 @@ function create (options, callback) {
     var scraper = new Scraper(instance, options);
     // add an error hander
     scraper.phantom.process.stderr.on('data', function(data) {
-      if (data.indexOf('PhantomJS has crashed') !== -1) {
+      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
         // on crash create a new instance and associate it with scraper
         // callback is a noop
         createPhantom(phantomOptions, scraper, function(err, instance) {});
