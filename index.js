@@ -198,7 +198,13 @@ Scraper.prototype.readyPage = function (url, options, callback) {
   var self = this;
   this.page(options, function (err, page) {
     if (err) return callback(err);
-    page.open(url, function (err, status) {
+    var pageOpened = false;
+    var pageOpenedTimeout = null;
+    var pageOpenCb = function (err, status) {
+      if (pageOpened) return;
+      pageOpened = true;
+      if (pageOpenTimeout) clearTimeout(pageOpenTimeout);
+
       debug('page %s opened with status %s', url, status);
       if (err) return callback(err);
       if (status !== 'success') {
@@ -244,7 +250,12 @@ Scraper.prototype.readyPage = function (url, options, callback) {
         // no error since it could just be something funky with the page js.
         readyCallback();
       }, 1000 * 60);
-    });
+    };
+    page.open(url, pageOpenCb);
+    pageOpenTimeout = setTimeout(function() {
+      debug('timed out waiting for %s page to open', url);
+      pageOpenedCb(new Error('timed out waiting for ' + url + ' to open'));
+    }, 1000 * 60);
   });
 };
 
