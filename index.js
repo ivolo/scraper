@@ -135,10 +135,22 @@ Scraper.prototype.page = function (options, callback) {
   phantom.create(function (err, instance) {
     self.phantom = instance;
     debug('created phantom instance');
+    // set up a binding for error logging
+    var outerPage = null;
+    instance.process.stderr.on('data', function(data) {
+      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
+        /// on crash create a new instance and associate it with scraper
+        debug('Phantom crashed - creating new instance');
+        if (outerPage) {
+          debug('Phantom crashed on page: %s, with title: %s', outerPage.url, outerPage.title);
+        }
+      }
+    });
 
     debug('creating disguised phantom page ..');
     instance.createPage(function (err, page) {
       if (err) return callback(err);
+      outerPage = page;
       disguise(page, options.headers);
       debug('created disguised phantom page');
       // add a basic error handler
@@ -151,6 +163,7 @@ Scraper.prototype.page = function (options, callback) {
       page.close = function() {
         pageClose(function(err) {
           instance.exit();
+          outerPage = null;
           isClosed = true;
         });
       };
