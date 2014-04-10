@@ -77,7 +77,7 @@ function createPhantom(phantomOptions, scraper, callback) {
     if (!scraper) return callback(null, instance);
     // otherwise set up bindings
     instance.process.stderr.on('data', function(data) {
-      if (data.indexOf('PhantomJS has crashed') !== -1) {
+      if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
         /// on crash create a new instance and associate it with scraper
         createPhantom(phantomOptions, scraper, function(err, instance) {
           // update the instance
