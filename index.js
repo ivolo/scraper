@@ -5,7 +5,8 @@ var Emitter = require('events').EventEmitter;
 var inherit = require('util').inherits;
 var mkdirp = require('mkdirp');
 var path = require('path');
-var phantom = require('node-phantom-simple');
+//var phantom = require('node-phantom-simple');
+var phantom = require('node-phantom');
 var cbutils = require('cb');
 
 /**
@@ -85,6 +86,7 @@ Scraper.prototype.bindPhantom = function(options, callback) {
   debug('binding new phantom to scraper');
   phantom.create(function (err, instance) {
     debug('created phantom instance');
+    /*
     instance.process.stderr.on('data', function(data) {
       if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
         /// on crash create a new instance and associate it with scraper
@@ -92,6 +94,7 @@ Scraper.prototype.bindPhantom = function(options, callback) {
         self.bindPhantom(options);
       }
     });
+    */
     self.phantom = instance;
     if (callback) {
       callback();

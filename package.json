@@ -14,13 +14,14 @@
     "scrape": "bin/scrape"
   },
   "dependencies": {
+    "cb": "~0.1.0",
+    "colors": "~0.6.2",
+    "commander": "~2.1.0",
     "debug": "~0.7.4",
     "defaults": "~1.0.0",
-    "commander": "~2.1.0",
-    "colors": "~0.6.2",
-    "node-phantom-simple": "git://github.com/tedjt/node-phantom-simple",
     "mkdirp": "~0.3.5",
-    "cb": "~0.1.0"
+    "node-phantom": "^0.2.5",
+    "node-phantom-simple": "git://github.com/tedjt/node-phantom-simple"
   },
   "devDependencies": {
     "mocha": "~1.15.1"
