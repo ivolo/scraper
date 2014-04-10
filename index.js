@@ -6,7 +6,6 @@ var inherit = require('util').inherits;
 var mkdirp = require('mkdirp');
 var path = require('path');
 var phantom = require('node-phantom-simple');
-var cbutils = require('cb');
 
 /**
  * Expose `create`.
@@ -221,15 +220,30 @@ Scraper.prototype.readyPage = function (url, options, callback) {
         });
       }
 
-      waitForReady(page, cbutils(function (err) {
-        if (options.includeJquery) {
+      var readyCallbackDone = false;
+      var readyTimeout = null;
+      var readyCallback = function (err) {
+        if (readyCallbackDone) return;
+        readyCallbackDone = true;
+        if (readyTimeout) clearTimeout(readyTimeout);
+        // ok - now do stuff with ready page.
+        if (!err && options.includeJquery) {
           return page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js', function() {
             callback(err, page);
           });
         } else {
           return callback(err, page);
         }
-      }).timeout(1000 * 60).once()); // always call the callback within a minute and only call once
+      };
+
+      waitForReady(page, readyCallback);
+      // always call the callback within a minute and only call once
+      readyTimeout = setTimeout(function() {
+        debug('timed out waiting for %s page to be ready', url);
+        //readyCallback(new Error('timed out waiting for ' + url + ' to load'));
+        // no error since it could just be something funky with the page js.
+        readyCallback();
+      }, 1000 * 60);
     });
   });
 };
