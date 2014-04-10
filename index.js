@@ -254,7 +254,7 @@ Scraper.prototype.readyPage = function (url, options, callback) {
     page.open(url, pageOpenCb);
     pageOpenTimeout = setTimeout(function() {
       debug('timed out waiting for %s page to open', url);
-      pageOpenedCb(new Error('timed out waiting for ' + url + ' to open'));
+      pageOpenCb(new Error('timed out waiting for ' + url + ' to open'));
     }, 1000 * 60);
   });
 };
