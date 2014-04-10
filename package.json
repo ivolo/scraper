@@ -20,7 +20,6 @@
     "debug": "~0.7.4",
     "defaults": "~1.0.0",
     "mkdirp": "~0.3.5",
-    "node-phantom": "^0.2.5",
     "node-phantom-simple": "git://github.com/tedjt/node-phantom-simple"
   },
   "devDependencies": {
