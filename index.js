@@ -104,10 +104,10 @@ function Scraper (phantom, options, callback) {
   if (!(this instanceof Scraper)) return new Scraper(phantom, options);
   this.options = options;
   this.phantom = phantom;
-  var self = this
+  var self = this;
   phantom.process.stderr.on('data', function(data) {
     if (data.toString().indexOf('PhantomJS has crashed') !== -1) {
-      createPhantom(phantomOptions, function(err, instance) {
+      createPhantom(options, function(err, instance) {
         // update the instance
         if (err) {
           console.log('UNABLE to CREATE new phantom instance');
