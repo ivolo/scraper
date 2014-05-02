@@ -78,6 +78,25 @@ describe('scraper', function () {
     });
   });
 
+  it.only('should be able to get a pages html for awocado.fi and recover from crash', function (done) {
+    this.timeout(90000); // need to wait extra for page ready
+    Scraper(function (err, scraper) {
+      if (err) return done(err);
+      scraper.html('http://www.awocado.fi', function (err, page, html) {
+        assert(!!err);
+        // should recover
+        scraper.html('https://bing.com', function(err, page, html) {
+          if (err) return done(err);
+          assert(page);
+          page.close();
+          assert(html);
+          assert(html.length > 0);
+          done();
+        });
+      });
+    });
+  });
+
   // useful for testing against local server to verify headers, etc.
   it.skip('Test headers', function (done) {
     this.timeout(30000); // need to wait extra for page ready
