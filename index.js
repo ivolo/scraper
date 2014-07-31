@@ -144,7 +144,8 @@ Scraper.prototype.page = function (options, callback) {
           debug('Phantom crashed on page: %s, with title: %s', outerPage.url, outerPage.title);
         }
       }
-      callback(new Error('phantom crashed'));
+      debug('event=phantomError msg=%s', data);
+      //callback(new Error('phantom crashed'));
     });
 
     debug('creating disguised phantom page ..');
